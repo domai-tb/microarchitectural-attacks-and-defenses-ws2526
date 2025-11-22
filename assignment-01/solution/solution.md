@@ -314,3 +314,16 @@ tim@pc18:~/microarchitectural-attacks-and-defenses-ws2526/assignment-01/solution
 tim@pc18:~/microarchitectural-attacks-and-defenses-ws2526/assignment-01/solution$ ls
 Makefile  solution.h  solution.md  task1  task2  task3  task4  task5  trace.out
 ```
+
+## Task 6 - Attack GnuPG (40%)
+
+The implementation of the binary to perform the attack can be found in `task6/task6.c`.
+
+The offsets to use can be identified by using the command `nm` and than `grep` for the interessing functions `mpi_powm` and `rsa_sign`. That leads to the offset 874656 (0xd58a0) and 762750 (0xba37e).
+
+```bash
+❯ nm ../../material/madgpg > nm_madpgp.log
+❯ grep -E "rsa_sign|mpi_powm" nm_madpgp.log
+00000000000d58a0 T mpi_powm
+00000000000ba37e T rsa_sign
+```
