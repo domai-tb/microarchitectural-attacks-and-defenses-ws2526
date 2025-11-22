@@ -8,7 +8,7 @@
 #include <solution.h>
 
 // How many measurements?
-#define SAMPLES 1 << 15
+#define SAMPLES 1 << 8
 
 int main(int argc, char* argv[]) {
     // Check CLI arguments
