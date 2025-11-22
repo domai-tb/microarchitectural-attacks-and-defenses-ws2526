@@ -3,12 +3,12 @@ CFLAGS := -O0 -Wall -I.
 
 C_BASENAMES := task1 task2
 
-DEP_task2 := task1.c
+DEP_task2 := ./task1/task1.c
 
 $(C_BASENAMES):
-	$(CC) $(CFLAGS) $@.c $@_test.c $(DEP_$@) -o $@
+	$(CC) $(CFLAGS) ./$@/$@.c ./$@/$@_test.c $(DEP_$@) -o ./$@/$@.bin
 
 clean:
-	rm $(C_BASENAMES) *.csv *.png
+	rm **/*.bin
 
-.PHONY: clean
+.PHONY: clean $(C_BASENAMES)
