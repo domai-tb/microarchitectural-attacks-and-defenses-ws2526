@@ -9,6 +9,6 @@ $(C_BASENAMES):
 	$(CC) $(CFLAGS) $@.c $@_test.c $(DEP_$@) -o $@
 
 clean:
-	rm $(C_BASENAMES) *.csv
+	rm $(C_BASENAMES) *.csv *.png
 
 .PHONY: clean
