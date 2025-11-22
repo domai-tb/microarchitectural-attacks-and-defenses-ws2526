@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 FILE="${1:-/home/victim/madgpg}"
-OFFSET1="${2:-80000}"
-OFFSET2="${3:-10000}"
+OFFSET1="${2:-874656}" # Sqaure
+OFFSET2="${3:-762750}" # Multiply
 
 # Make sure sudo can be used non-interactively (or enter password once)
 sudo -v || { echo "sudo failed"; exit 1; }

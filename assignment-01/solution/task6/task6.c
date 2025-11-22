@@ -7,6 +7,9 @@
 #include <string.h>
 #include "solution.h"
 
+#define SAMPLES 100000
+#define PERSIOD 10000
+
 void monitor_rsa_signing(void *trigger, void *p1, void *p2, uint32_t period, uint32_t count, uint32_t *trace) {
     // Monitor the memory access during RSA signing
     monitor(trigger, period, count);
@@ -35,14 +38,14 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    uint32_t *trace = (uint32_t *)malloc(2 * 1000 * sizeof(uint32_t));  // Allocate space for trace
+    uint32_t *trace = (uint32_t *)malloc(2 * SAMPLES * sizeof(uint32_t));  // Allocate space for trace
     if (!trace) {
         printf("Memory allocation failed!\n");
         return 1;
     }
 
     // Perform the monitoring and tracing during RSA signature
-    monitor_rsa_signing(trigger, p1, p2, 2000, 10000, trace);
+    monitor_rsa_signing(trigger, p1, p2, PERSIOD, SAMPLES, trace);
 
     // Save the trace results to file
     FILE *out = fopen("gnupg.txt", "w");
@@ -53,7 +56,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Output the trace data
-    for (uint32_t i = 0; i < 1000; i++) {
+    for (uint32_t i = 0; i < SAMPLES; i++) {
         fprintf(out, "%u %u\n", trace[2 * i], trace[2 * i + 1]);
     }
 

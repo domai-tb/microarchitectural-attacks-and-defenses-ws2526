@@ -12,10 +12,10 @@ p2_times = trace_data[:, 1]  # Second column: p2 access times
 plt.figure(figsize=(12, 6))
 
 # Plot p1 access times
-plt.plot(p1_times, label="p1 Access Times", color="magenta")
+plt.plot(p1_times, label="Square", color="magenta")
 
 # Plot p2 access times
-plt.plot(p2_times, label="p2 Access Times", color="cyan")
+plt.plot(p2_times, label="Multiply", color="cyan")
 
 plt.xlabel("Iterations")
 plt.ylabel("Cycle Counts")
