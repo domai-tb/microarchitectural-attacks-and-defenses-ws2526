@@ -76,9 +76,9 @@ to create the following histogram of the access times.
 CLI Usage:
 
 ```bash
-❯ ./task2.bin /etc/passwd
+$ ./task2.bin /etc/passwd
 Wrote task2.csv with 256 samples.
-❯ python task2.py
+$ python task2.py
 Cached:   mean=51.89, median=36.00, std=17.88, min=36, max=72
 Uncached: mean=324.70, median=288.00, std=167.09, min=252, max=1548
 Saved histogram to task2.png
@@ -140,136 +140,6 @@ Sadly I couldn't identify where the error is comming from...
 
 ![](./task4/task4.png)
 
-Command output:
-
-```bash
-tim@pc18:~/microarchitectural-attacks-and-defenses-ws2526/assignment-01/solution/task4$ ./task4.sh testfile.txt 123
-Running experiments on file=testfile.txt offset=123
-
-=== Period 1000 cycles ===
-Running frtest...
-  frtest done → results/period_1000/frtest.txt
-Running monitor...
-  monitor done → results/period_1000/monitor.txt
-
-=== Period 2000 cycles ===
-Running frtest...
-  frtest done → results/period_2000/frtest.txt
-Running monitor...
-  monitor done → results/period_2000/monitor.txt
-
-=== Period 3000 cycles ===
-Running frtest...
-  frtest done → results/period_3000/frtest.txt
-Running monitor...
-  monitor done → results/period_3000/monitor.txt
-
-=== Period 4000 cycles ===
-Running frtest...
-  frtest done → results/period_4000/frtest.txt
-Running monitor...
-  monitor done → results/period_4000/monitor.txt
-
-=== Period 5000 cycles ===
-Running frtest...
-  frtest done → results/period_5000/frtest.txt
-Running monitor...
-  monitor done → results/period_5000/monitor.txt
-
-=== Period 6000 cycles ===
-Running frtest...
-  frtest done → results/period_6000/frtest.txt
-Running monitor...
-  monitor done → results/period_6000/monitor.txt
-
-=== Period 7000 cycles ===
-Running frtest...
-  frtest done → results/period_7000/frtest.txt
-Running monitor...
-  monitor done → results/period_7000/monitor.txt
-
-=== Period 8000 cycles ===
-Running frtest...
-  frtest done → results/period_8000/frtest.txt
-Running monitor...
-  monitor done → results/period_8000/monitor.txt
-
-=== Period 9000 cycles ===
-Running frtest...
-  frtest done → results/period_9000/frtest.txt
-Running monitor...
-  monitor done → results/period_9000/monitor.txt
-
-=== Period 10000 cycles ===
-Running frtest...
-  frtest done → results/period_10000/frtest.txt
-Running monitor...
-  monitor done → results/period_10000/monitor.txt
-
-=== Period 11000 cycles ===
-Running frtest...
-  frtest done → results/period_11000/frtest.txt
-Running monitor...
-  monitor done → results/period_11000/monitor.txt
-
-=== Period 12000 cycles ===
-Running frtest...
-  frtest done → results/period_12000/frtest.txt
-Running monitor...
-  monitor done → results/period_12000/monitor.txt
-
-=== Period 13000 cycles ===
-Running frtest...
-  frtest done → results/period_13000/frtest.txt
-Running monitor...
-  monitor done → results/period_13000/monitor.txt
-
-=== Period 14000 cycles ===
-Running frtest...
-  frtest done → results/period_14000/frtest.txt
-Running monitor...
-  monitor done → results/period_14000/monitor.txt
-
-=== Period 15000 cycles ===
-Running frtest...
-  frtest done → results/period_15000/frtest.txt
-Running monitor...
-  monitor done → results/period_15000/monitor.txt
-
-=== Period 16000 cycles ===
-Running frtest...
-  frtest done → results/period_16000/frtest.txt
-Running monitor...
-  monitor done → results/period_16000/monitor.txt
-
-=== Period 17000 cycles ===
-Running frtest...
-  frtest done → results/period_17000/frtest.txt
-Running monitor...
-  monitor done → results/period_17000/monitor.txt
-
-=== Period 18000 cycles ===
-Running frtest...
-  frtest done → results/period_18000/frtest.txt
-Running monitor...
-  monitor done → results/period_18000/monitor.txt
-
-=== Period 19000 cycles ===
-Running frtest...
-  frtest done → results/period_19000/frtest.txt
-Running monitor...
-  monitor done → results/period_19000/monitor.txt
-
-=== Period 20000 cycles ===
-Running frtest...
-  frtest done → results/period_20000/frtest.txt
-Running monitor...
-  monitor done → results/period_20000/monitor.txt
-
-All experiments completed.
-Results stored under: results/
-```
-
 ## Task 5 - Create an Access Trace (20%)
 
 The implementation of `fr_trace` can be found in the file `task5/task5.c` starting at line 8.
@@ -322,8 +192,13 @@ The implementation of the binary to perform the attack can be found in `task6/ta
 The offsets to use can be identified by using the command `nm` and than `grep` for the interessing functions `mpi_powm` and `rsa_sign`. That leads to the offset 874656 (0xd58a0) and 762750 (0xba37e).
 
 ```bash
-❯ nm ../../material/madgpg > nm_madpgp.log
-❯ grep -E "rsa_sign|mpi_powm" nm_madpgp.log
+$ nm ../../material/madgpg > nm_madpgp.log
+$ grep -E "rsa_sign|mpi_powm" nm_madpgp.log
 00000000000d58a0 T mpi_powm
 00000000000ba37e T rsa_sign
 ```
+
+It is important to note that, the `flush_reload()` function may return incorrect results (see Task 2), which could potentially lead to some inaccuracies in the observed data. This could affect the identification of the exact locations of square and multiply operations. Therefore, while the graph provides useful insight into the behavior of these operations, there may still be room for error in the measurement process. So I don't think it would be possible to extract the correct key.
+
+![](./task6/task6.png)
+![](./task6/task6_zoomed.png)
