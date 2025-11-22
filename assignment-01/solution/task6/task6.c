@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Perform the monitoring and tracing during RSA signature
-    monitor_rsa_signing(trigger, p1, p2, 10000, 1000, trace);
+    monitor_rsa_signing(trigger, p1, p2, 2000, 10000, trace);
 
     // Save the trace results to file
     FILE *out = fopen("gnupg.txt", "w");
