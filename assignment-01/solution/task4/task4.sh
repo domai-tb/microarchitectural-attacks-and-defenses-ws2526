@@ -8,7 +8,7 @@ fi
 
 FILE=$1
 OFFSET=$2
-MONITOR_BIN="./task4" 
+MONITOR_BIN="./task4.bin" 
 RESULT_DIR="results"
 
 mkdir -p "$RESULT_DIR"
