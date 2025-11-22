@@ -10,8 +10,6 @@ void fr_trace(void *p1, void *p2, uint32_t period, uint32_t count, uint32_t *tra
 
     for (uint32_t i = 0; i < count; ++i) {
         
-        uint64_t elapsed_time = 0;
-        
         // Check only after period cycles
         while ((__rdtsc() - start_time) < period) {
             // Sleep until next period is starting
@@ -24,8 +22,5 @@ void fr_trace(void *p1, void *p2, uint32_t period, uint32_t count, uint32_t *tra
         // Store the results in trace[2*i] and trace[2*i + 1]
         trace[2 * i] = cycles_p1;
         trace[2 * i + 1] = cycles_p2;
-
-        // Update elapsed time for next period calculation
-        elapsed_time = __rdtsc() - start_time;
     }
 }
