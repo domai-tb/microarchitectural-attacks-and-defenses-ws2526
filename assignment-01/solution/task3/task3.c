@@ -19,8 +19,8 @@ int monitor(void* p, uint32_t period, uint64_t maxwait) {
         uint32_t cycles = flush_reload(p);
 
         // Threshold comes from task2 measurement where the maximum
-        // cached cycle count was 144. See solution.md, section "Task 2"
-        if (cycles < 150) {
+        // cached cycle count was 72. See solution.md, section "Task 2"
+        if (cycles < 100) {
             // Memory area was cached before
             return 1;
         }

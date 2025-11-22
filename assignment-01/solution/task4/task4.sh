@@ -9,6 +9,7 @@ fi
 FILE=$1
 OFFSET=$2
 MONITOR_BIN="./task4.bin" 
+FRTEST_BIN="../../material/frtest"
 RESULT_DIR="results"
 
 mkdir -p "$RESULT_DIR"
@@ -26,7 +27,7 @@ for PERIOD in $(seq 1000 1000 20000); do
     FRTEST_OUT="$OUTDIR/frtest.txt"
 
     echo "Running frtest..."
-    /home/victim/frtest "$FILE" "$OFFSET" > "$FRTEST_OUT"
+    "$FRTEST_BIN" "$FILE" "$OFFSET" > "$FRTEST_OUT"
     echo "  frtest done → $FRTEST_OUT"
 
     # 2) Run your monitor program

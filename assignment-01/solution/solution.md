@@ -2,7 +2,7 @@
 
 ## Task 1 - Use mmap. (10%)
 
-The implementation of `map` can be found in the file `task1.c` starting at line 10.
+The implementation of `map` can be found in the file `task1/task1.c` starting at line 10.
 
 ```c
 void *map(char *file_name, uint64_t offset) {
@@ -31,22 +31,241 @@ void *map(char *file_name, uint64_t offset) {
 
 ## Task 2 - Implement the Flush+Reload Function (10%)
 
-The implementation of `flush_reload` can be found in the file `task2.c` starting at line 7.
-The CLI wrapper implemented in `task2_test.c` was used to measure the access times of the file
-`/etc/passwd` and wrote the measured times to `task2.csv`. The Pythom script `task2.py` was used
+The implementation of `flush_reload` can be found in the file `task2/task2.c` starting at line 7.
+
+```c
+uint32_t flush_reload(void *p) {
+    uint32_t cycles;
+
+    // Cast pointer to address
+    volatile unsigned char *addr = (volatile unsigned char*)p;
+
+    asm volatile (
+        // Fence previous instructions and memory loads
+        "mfence\n"
+        "lfence\n"
+        // Messure cycles
+        "rdtsc\n"
+        // Save low 32 bits of start in edi
+        "movl %%eax, %%edi\n"
+        // Read the byte at addr into al (this loads it into cache)
+        "movb (%1), %%al\n"
+        // Fence  memory load
+        "lfence\n"
+        // Mesure cycles again
+        "rdtsc\n"
+        // Calculate operation cycles
+        "subl %%edi, %%eax\n"
+        // Flush
+        "clflush 0(%1)\n"
+        : "=a" (cycles)
+        : "c" (addr)
+        : "%edi", "%edx", "memory"
+    );
+
+    return cycles;
+}
+```
+
+The CLI wrapper implemented in `task2/task2_test.c` was used to measure the access times of the file
+`/etc/passwd` and wrote the measured times to `task2/task2.csv`. The Pythom script `task2/task2.py` was used
 to create the following histogram of the access times.
 
-![](./task2.png)
+![](./task2/task2.png)
 
 CLI Usage:
 
 ```bash
-❯ make task2
-gcc -O0 -Wall -I. task2.c task2_test.c task1.c -o task2
-❯ ./task2 /etc/passwd
-Wrote task2.csv with 32768 samples.
+❯ ./task2.bin /etc/passwd
+Wrote task2.csv with 256 samples.
 ❯ python task2.py
-Cached:   mean=53.86, median=36.00, std=19.52, min=36, max=144
-Uncached: mean=333.48, median=288.00, std=249.22, min=252, max=24588
+Cached:   mean=51.89, median=36.00, std=17.88, min=36, max=72
+Uncached: mean=324.70, median=288.00, std=167.09, min=252, max=1548
 Saved histogram to task2.png
+```
+
+## Task 3 - Use Flush+Reload to monitor access to memory (10%)
+
+The implementation of `flush_reload` can be found in the file `task3/task3.c` starting at line 8.
+
+```c
+int monitor(void* p, uint32_t period, uint64_t maxwait) {
+    uint64_t start_time = __rdtsc();
+    uint64_t elapsed_time = 0;
+
+    while (elapsed_time < maxwait) {
+        // Check only after period cycles
+        while ((__rdtsc() - start_time) < period) {
+            // Sleep until next period is starting
+        }
+
+        // Use flush+reload of task 2
+        uint32_t cycles = flush_reload(p);
+
+        // Threshold comes from task2 measurement where the maximum
+        // cached cycle count was 72. See solution.md, section "Task 2"
+        if (cycles < 100) {
+            // Memory area was cached before
+            return 1;
+        }
+
+        // Update time
+        elapsed_time = __rdtsc() - start_time;
+    }
+
+    // No access detected in given maxwait time
+    return 0;
+}
+```
+
+## Task 4 - Test monitoring accuracy (10%)
+
+Based on the plot, where the overlap probability remains zero, the most likely issue is that the implementation of the `flush_reload` function or monitoring logic is not correctly detecting memory accesses.
+At this point I sadly hadn't enought time to deep dive into the implementation issues and couldn't identify what was wrong with my implementation. So I will work with the results provided here.
+
+The results are probaly caused by:
+
+### 1. Flush+Reload Not Detecting Accesses:
+
+If `flush_reload()` isn’t working as expected (e.g., due to incorrect memory access detection or misalignment), it will fail to detect any memory accesses, which leads to no overlap being detected.
+
+As I check the cycle counts by printing them during `flush_reload()` to ensure they are correct and that memory accesses are being properly registered, it seems to be working. So I don't understand why it isn't working at the attack. Especially as the results of task 2 indicate a correct access time measurement.
+
+### 2. Memory Mapping/Access Timing Issue:
+
+If the memory access event from `frtest.txt` happens outside the time window or tolerance range of `monitor.txt` events, it will result in no overlap.
+As I tried to finetune and adjust the tolerance value of the script to read the result data, it doesn't matter if the tolerance was low or high (tried with values between 10 amd 100000).
+
+Sadly I couldn't identify where the error is comming from...
+
+![](./task4/task4.png)
+
+Command output:
+
+```bash
+tim@pc18:~/microarchitectural-attacks-and-defenses-ws2526/assignment-01/solution/task4$ ./task4.sh testfile.txt 123
+Running experiments on file=testfile.txt offset=123
+
+=== Period 1000 cycles ===
+Running frtest...
+  frtest done → results/period_1000/frtest.txt
+Running monitor...
+  monitor done → results/period_1000/monitor.txt
+
+=== Period 2000 cycles ===
+Running frtest...
+  frtest done → results/period_2000/frtest.txt
+Running monitor...
+  monitor done → results/period_2000/monitor.txt
+
+=== Period 3000 cycles ===
+Running frtest...
+  frtest done → results/period_3000/frtest.txt
+Running monitor...
+  monitor done → results/period_3000/monitor.txt
+
+=== Period 4000 cycles ===
+Running frtest...
+  frtest done → results/period_4000/frtest.txt
+Running monitor...
+  monitor done → results/period_4000/monitor.txt
+
+=== Period 5000 cycles ===
+Running frtest...
+  frtest done → results/period_5000/frtest.txt
+Running monitor...
+  monitor done → results/period_5000/monitor.txt
+
+=== Period 6000 cycles ===
+Running frtest...
+  frtest done → results/period_6000/frtest.txt
+Running monitor...
+  monitor done → results/period_6000/monitor.txt
+
+=== Period 7000 cycles ===
+Running frtest...
+  frtest done → results/period_7000/frtest.txt
+Running monitor...
+  monitor done → results/period_7000/monitor.txt
+
+=== Period 8000 cycles ===
+Running frtest...
+  frtest done → results/period_8000/frtest.txt
+Running monitor...
+  monitor done → results/period_8000/monitor.txt
+
+=== Period 9000 cycles ===
+Running frtest...
+  frtest done → results/period_9000/frtest.txt
+Running monitor...
+  monitor done → results/period_9000/monitor.txt
+
+=== Period 10000 cycles ===
+Running frtest...
+  frtest done → results/period_10000/frtest.txt
+Running monitor...
+  monitor done → results/period_10000/monitor.txt
+
+=== Period 11000 cycles ===
+Running frtest...
+  frtest done → results/period_11000/frtest.txt
+Running monitor...
+  monitor done → results/period_11000/monitor.txt
+
+=== Period 12000 cycles ===
+Running frtest...
+  frtest done → results/period_12000/frtest.txt
+Running monitor...
+  monitor done → results/period_12000/monitor.txt
+
+=== Period 13000 cycles ===
+Running frtest...
+  frtest done → results/period_13000/frtest.txt
+Running monitor...
+  monitor done → results/period_13000/monitor.txt
+
+=== Period 14000 cycles ===
+Running frtest...
+  frtest done → results/period_14000/frtest.txt
+Running monitor...
+  monitor done → results/period_14000/monitor.txt
+
+=== Period 15000 cycles ===
+Running frtest...
+  frtest done → results/period_15000/frtest.txt
+Running monitor...
+  monitor done → results/period_15000/monitor.txt
+
+=== Period 16000 cycles ===
+Running frtest...
+  frtest done → results/period_16000/frtest.txt
+Running monitor...
+  monitor done → results/period_16000/monitor.txt
+
+=== Period 17000 cycles ===
+Running frtest...
+  frtest done → results/period_17000/frtest.txt
+Running monitor...
+  monitor done → results/period_17000/monitor.txt
+
+=== Period 18000 cycles ===
+Running frtest...
+  frtest done → results/period_18000/frtest.txt
+Running monitor...
+  monitor done → results/period_18000/monitor.txt
+
+=== Period 19000 cycles ===
+Running frtest...
+  frtest done → results/period_19000/frtest.txt
+Running monitor...
+  monitor done → results/period_19000/monitor.txt
+
+=== Period 20000 cycles ===
+Running frtest...
+  frtest done → results/period_20000/frtest.txt
+Running monitor...
+  monitor done → results/period_20000/monitor.txt
+
+All experiments completed.
+Results stored under: results/
 ```
