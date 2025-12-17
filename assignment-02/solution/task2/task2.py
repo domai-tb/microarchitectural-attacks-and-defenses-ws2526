@@ -25,11 +25,25 @@ import matplotlib.pyplot as plt
 # Adjust test cases as desired.
 # Each case: number of samples, list of 10 rattled sets, label for output file name.
 TEST_CASES = [
-    {"samples": 200, "sets": [5, 7, 9, 11, 13, 15, 20, 22, 24, 26], "label": "case1"},
-    {"samples": 200, "sets": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "label": "case2"},
+    {
+        "samples": 10000,
+        "sets": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        "label": "case1",
+    },
+    {
+        "samples": 10000,
+        "sets": [10, 15, 20, 25, 30, 40, 45, 50, 55, 60],
+        "label": "case2",
+    },
+    {
+        "samples": 10000,
+        "sets": [5, 7, 9, 11, 13, 15, 20, 22, 24, 26],
+        "label": "case3",
+    },
 ]
 
-TASK2_TEST = "./task2.bin"
+# Assume script is run from solution directory
+TASK2_TEST = "./task2/task2.bin"
 L1_SETS = 64
 
 
@@ -106,21 +120,30 @@ def plot_heatmap(heat: np.ndarray, label: str, rattled_sets: list[int]) -> None:
     """
     num_samples = heat.shape[1]
 
+    # Flatten outliers: clamp to 99th percentile or hard cap like 200 cycles
+    flat = heat.flatten()
+    flat_nonzero = flat[flat > 0]
+    if flat_nonzero.size:
+        upper = np.percentile(flat_nonzero, 99.0)
+    else:
+        upper = 200.0
+    heat_clipped = np.clip(heat, 0, upper)
+
     plt.figure(figsize=(10, 6))
     plt.imshow(
-        heat,
+        heat_clipped,
         aspect="auto",
         origin="lower",
         interpolation="nearest",
         extent=[0, num_samples, 0, L1_SETS],
     )
-    plt.colorbar(label="Probe time (cycles)")
+    plt.colorbar(label=f"Probe time (cycles, clipped ≤ {upper:.1f})")
     plt.xlabel("Sample number")
     plt.ylabel("Cache set (0–63)")
     plt.title(f"Task 2 heatmap – {label}\nRattled sets: {rattled_sets}")
 
     plt.tight_layout()
-    out_name = f"./heatmaps/{label}.png"
+    out_name = f"./task2/heatmaps/{label}.png"
     plt.savefig(out_name, dpi=200)
     plt.close()
     print(f"Saved heatmap to {out_name}")
@@ -149,7 +172,7 @@ def main() -> None:
         data = run_task2_test(samples, sets)
 
         # Optional: write raw data to a .dat file for inspection.
-        dat_path = f"heatmaps/{label}.dat"
+        dat_path = f"./task2/heatmaps/{label}.dat"
         np.savetxt(dat_path, data, fmt="%d")
         print(f"Saved raw data to {dat_path}")
 

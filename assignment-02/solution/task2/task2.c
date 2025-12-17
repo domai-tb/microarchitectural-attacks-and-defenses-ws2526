@@ -66,6 +66,7 @@ int task2_init(size_t region_size) {
     return 0;
 }
 
+__attribute__((noinline))
 void task2_prime_all(void) {
     for (int s = 0; s < L1_SETS; s++) {
         volatile node_t *p = g_sets[s];
@@ -75,15 +76,16 @@ void task2_prime_all(void) {
     }
 }
 
+
+__attribute__((noinline))
 void task2_rattle_cache_sets(int n, const int *sets, uint32_t iterations) {
-    volatile node_t *p;
     for (uint32_t it = 0; it < iterations; it++) {
         for (int i = 0; i < n; i++) {
             int s = sets[i];
             if (s < 0 || s >= L1_SETS) {
                 continue;
             }
-            p = g_sets[s];
+            volatile node_t *p = g_sets[s];
             for (int k = 0; k < L1_ASSOC; k++) {
                 p = p->next;
             }
@@ -91,6 +93,8 @@ void task2_rattle_cache_sets(int n, const int *sets, uint32_t iterations) {
     }
 }
 
+
+__attribute__((noinline))
 uint64_t task2_probe_set(int set_index) {
     if (set_index < 0 || set_index >= L1_SETS) {
         return 0;
@@ -98,18 +102,34 @@ uint64_t task2_probe_set(int set_index) {
 
     volatile node_t *p = g_sets[set_index];
     uint64_t start, end;
+    unsigned hi, lo;
 
-    /* simple serialization */
-    asm volatile("lfence" ::: "memory");
-    start = rdtsc64();
+    /* Serialize before timing */
+    asm volatile("mfence\n\tlfence\n\trdtsc\n\t"
+                 "mov %%eax, %0\n\t"
+                 "mov %%edx, %1\n\t"
+                 "lfence"
+                 : "=r"(lo), "=r"(hi)
+                 :
+                 : "%rax", "%rdx", "memory");
+    start = ((uint64_t)hi << 32) | lo;
+
+    /* Pointer chasing: each load depends on the previous, and volatile prevents removal */
     for (int i = 0; i < L1_ASSOC; i++) {
         p = p->next;
     }
-    end = rdtsc64();
-    asm volatile("lfence" ::: "memory");
+
+    asm volatile("lfence\n\trdtsc\n\t"
+                 "mov %%eax, %0\n\t"
+                 "mov %%edx, %1\n\t"
+                 : "=r"(lo), "=r"(hi)
+                 :
+                 : "%rax", "%rdx", "memory");
+    end = ((uint64_t)hi << 32) | lo;
 
     return end - start;
 }
+
 
 void task2_cleanup(void) {
     if (g_region) {

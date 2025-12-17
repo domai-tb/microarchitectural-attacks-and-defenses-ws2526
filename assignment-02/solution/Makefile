@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS := -O0 -Wall -I.
+CFLAGS := -O4 -Wall -I.
 
 AES_DIR := ../material/AES
 AES_DEP := $(AES_DIR)/aes.c $(AES_DIR)/aes_core.c
