@@ -19,7 +19,7 @@ clean:
 	rm **/*.bin
 
 pdf:
-	pandoc solution.md -o answers.pdf
+	pandoc --pdf-engine=xelatex solution.md -o answers.pdf
 
 build_everthing:
 	make task1

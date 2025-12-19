@@ -103,12 +103,23 @@ section "Task 3 – First round AES attack (upper nibbles)"
 info "Goal: Recover upper 4 bits of each AES key byte via first-round Prime+Probe."
 info "Demo run with a known key."
 
-TASK3_SAMPLES=20000
-TASK3_KEY="00112233445566778899aabbccddeeff"
+TASK3_SAMPLES=100000
+
+TEST_KEY_1="00112233445566778899aabbccddeeff"
+TEST_KEY_2="df7d3a13e080c27723feee1fac7b9c01"
+TEST_KEY_3="e62e42c48cd0fc1ab93b5be24725d5b7"
 
 run_cmd \
-  "Running Task 3: samples=${TASK3_SAMPLES}, key=${TASK3_KEY} (prints 16 hex digits)" \
-  ./task3/task3.bin "$TASK3_SAMPLES" "$TASK3_KEY"
+  "Running Task 3: samples=${TASK3_SAMPLES}, key=${TEST_KEY_1} (prints 16 hex digits)" \
+  ./task3/task3.bin "$TASK3_SAMPLES" "$TEST_KEY_1"
+
+run_cmd \
+  "Running Task 3: samples=${TASK3_SAMPLES}, key=${TEST_KEY_2} (prints 16 hex digits)" \
+  ./task3/task3.bin "$TASK3_SAMPLES" "$TEST_KEY_2"
+
+run_cmd \
+  "Running Task 3: samples=${TASK3_SAMPLES}, key=${TEST_KEY_3} (prints 16 hex digits)" \
+  ./task3/task3.bin "$TASK3_SAMPLES" "$TEST_KEY_3"
 
 ok "Task 3 executed successfully."
 
@@ -118,16 +129,18 @@ section "Task 4 – Last round AES attack (recover K10)"
 info "Goal: Recover full last-round key K10 bytes via ciphertext clustering and INV_SBOX model."
 info "Demo run with the same key."
 
-TASK4_SAMPLES=20000
-TASK4_KEY="$TASK3_KEY"
+TASK4_SAMPLES=100000
 
 run_cmd \
-  "Running Task 4: samples=${TASK4_SAMPLES}, key=${TASK4_KEY} (prints recovered K10 / accuracy)" \
-  ./task4/task4.bin "$TASK4_SAMPLES" "$TASK4_KEY"
+  "Running Task 4: samples=${TASK4_SAMPLES}, key=${TEST_KEY_1} (prints recovered K10 / accuracy)" \
+  ./task4/task4.bin "$TASK4_SAMPLES" "$TEST_KEY_1"
+
+run_cmd \
+  "Running Task 4: samples=${TASK4_SAMPLES}, key=${TEST_KEY_2} (prints recovered K10 / accuracy)" \
+  ./task4/task4.bin "$TASK4_SAMPLES" "$TEST_KEY_2"
+
+run_cmd \
+  "Running Task 4: samples=${TASK4_SAMPLES}, key=${TEST_KEY_3} (prints recovered K10 / accuracy)" \
+  ./task4/task4.bin "$TASK4_SAMPLES" "$TEST_KEY_3"
 
 ok "Task 4 executed successfully."
-
-# ---------------------------- summary ----------------------------
-
-section "Summary"
-ok "All tasks executed successfully."
