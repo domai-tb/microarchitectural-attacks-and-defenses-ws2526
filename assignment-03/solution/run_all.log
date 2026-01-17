@@ -1,0 +1,96 @@
+------------------------------------------------------------
+[1mBuild(B[m
+------------------------------------------------------------
+[34m[i](B[m Running make to build all task binaries
+[2mBuild all targets(B[m
+[1m$ make(B[m
+make task1
+make[1]: Entering directory '/home/domai/Coding/microarchitectural-attacks-and-defenses-ws2526/assignment-03/solution'
+gcc -O4 -Wall -I. ./task1/task1.c ./task1/task1_test.c  -o ./task1/task1.bin 2>/dev/null || \
+gcc -O4 -Wall -I. ./task1/task1.c  -o ./task1/task1.bin
+make[1]: Leaving directory '/home/domai/Coding/microarchitectural-attacks-and-defenses-ws2526/assignment-03/solution'
+make task2
+make[1]: Entering directory '/home/domai/Coding/microarchitectural-attacks-and-defenses-ws2526/assignment-03/solution'
+gcc -O4 -Wall -I. ./task2/task2.c ./task2/task2_test.c  -o ./task2/task2.bin 2>/dev/null || \
+gcc -O4 -Wall -I. ./task2/task2.c  -o ./task2/task2.bin
+make[1]: Leaving directory '/home/domai/Coding/microarchitectural-attacks-and-defenses-ws2526/assignment-03/solution'
+make task3
+make[1]: Entering directory '/home/domai/Coding/microarchitectural-attacks-and-defenses-ws2526/assignment-03/solution'
+gcc -O4 -Wall -I. ./task3/task3.c ./task3/task3_test.c  -o ./task3/task3.bin 2>/dev/null || \
+gcc -O4 -Wall -I. ./task3/task3.c  -o ./task3/task3.bin
+make[1]: Leaving directory '/home/domai/Coding/microarchitectural-attacks-and-defenses-ws2526/assignment-03/solution'
+make task4
+make[1]: Entering directory '/home/domai/Coding/microarchitectural-attacks-and-defenses-ws2526/assignment-03/solution'
+gcc -O4 -Wall -I. ./task4/task4.c ./task4/task4_test.c  -o ./task4/task4.bin 2>/dev/null || \
+gcc -O4 -Wall -I. ./task4/task4.c  -o ./task4/task4.bin
+make[1]: Leaving directory '/home/domai/Coding/microarchitectural-attacks-and-defenses-ws2526/assignment-03/solution'
+make task5
+make[1]: Entering directory '/home/domai/Coding/microarchitectural-attacks-and-defenses-ws2526/assignment-03/solution'
+gcc -O4 -Wall -I. ./task5/task5.c ./task5/task5_test.c ./task2/task2.c ./task3/task3.c -o ./task5/task5.bin 2>/dev/null || \
+gcc -O4 -Wall -I. ./task5/task5.c ./task2/task2.c ./task3/task3.c -o ./task5/task5.bin
+make[1]: Leaving directory '/home/domai/Coding/microarchitectural-attacks-and-defenses-ws2526/assignment-03/solution'
+make task6
+make[1]: Entering directory '/home/domai/Coding/microarchitectural-attacks-and-defenses-ws2526/assignment-03/solution'
+gcc -O4 -Wall -I. ./task6/task6.c ./task6/task6_test.c ./task3/task3.c ./task4/task4.c -o ./task6/task6.bin 2>/dev/null || \
+gcc -O4 -Wall -I. ./task6/task6.c ./task3/task3.c ./task4/task4.c -o ./task6/task6.bin
+make[1]: Leaving directory '/home/domai/Coding/microarchitectural-attacks-and-defenses-ws2526/assignment-03/solution'
+
+[32m[✓](B[m Build completed.
+------------------------------------------------------------
+[1mVerify binaries(B[m
+------------------------------------------------------------
+[32m[✓](B[m Found executable: task1/task1.bin
+[32m[✓](B[m Found executable: task2/task2.bin
+[32m[✓](B[m Found executable: task3/task3.bin
+[32m[✓](B[m Found executable: task4/task4.bin
+[32m[✓](B[m Found executable: task5/task5.bin
+[32m[✓](B[m Found executable: task6/task6.bin
+------------------------------------------------------------
+[1mTask 1 – NOT gate(B[m
+------------------------------------------------------------
+[2mGenerating NOT accuracy data(B[m
+[1m$ true(B[m
+
+[32m[✓](B[m Saved task1/data/not.dat
+------------------------------------------------------------
+[1mTask 2 – NAND/NOR gates(B[m
+------------------------------------------------------------
+[2mGenerating NAND/NOR accuracy data(B[m
+[1m$ true(B[m
+
+[32m[✓](B[m Saved task2/data/nand_nor.dat
+------------------------------------------------------------
+[1mTask 3 – Multi-output gates(B[m
+------------------------------------------------------------
+[2mSweeping fan-out (samples=200, max_out=16)(B[m
+[1m$ true(B[m
+
+[32m[✓](B[m Saved task3/data/fanout.dat
+------------------------------------------------------------
+[1mTask 4 – AND/OR gates(B[m
+------------------------------------------------------------
+[2mGenerating AND/OR accuracy data(B[m
+[1m$ true(B[m
+
+[32m[✓](B[m Saved task4/data/and_or.dat
+------------------------------------------------------------
+[1mTask 5 – XOR gate(B[m
+------------------------------------------------------------
+[2mGenerating XOR accuracy data(B[m
+[1m$ true(B[m
+
+[32m[✓](B[m Saved task5/data/xor.dat
+------------------------------------------------------------
+[1mTask 6 – 7-segment LED(B[m
+------------------------------------------------------------
+[2mGenerating 7-seg accuracy data(B[m
+[1m$ true(B[m
+
+[32m[✓](B[m Saved task6/data/seg7.dat
+------------------------------------------------------------
+[1mPlots(B[m
+------------------------------------------------------------
+[2mGenerating summary plots(B[m
+[1m$ python3 plot_results.py(B[m
+
+[32m[✓](B[m Saved plots under: plots/

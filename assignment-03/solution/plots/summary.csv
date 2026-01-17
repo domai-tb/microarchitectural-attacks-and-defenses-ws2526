@@ -1,0 +1,8 @@
+gate,accuracy_percent
+NOT,50.00
+NAND,25.00
+NOR,74.45
+AND,75.00
+OR,25.00
+XOR,50.10
+7SEG,39.16
