@@ -19,7 +19,7 @@ static void xor_flush_scratch(int count) {
 
 __attribute__((noinline))
 void XOR(void *out, void *in1, void *in2) {
-    /* scratch layout */
+    // scratch layout
     void *na1 = xor_line(0);
     void *na2 = xor_line(1);
     void *na_for_a = xor_line(2);

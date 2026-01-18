@@ -17,14 +17,14 @@ static inline void *train_out_ptr(int idx) {
 static inline void gate_delay(void) {
     uint64_t x = 1;
     for (int i = 0; i < GATE_DELAY_ITERS; i++) {
-        x = x * 33 + 17;
+        x = x * 33 + 17;  // Just some operation that depends on x
     }
     asm volatile("" : "+r"(x) : : "memory");
 }
 
 __attribute__((noinline))
 void NOT_M(void **outs, int n_out, void *in) {
-    g_train_in[0] = 1;
+    g_train_in[0] = 0;
 
     for (int iter = 0; iter < GATE_TRAINING_ITERS + 1; iter++) {
         volatile uint8_t *in_ptr =
@@ -32,20 +32,22 @@ void NOT_M(void **outs, int n_out, void *in) {
 
         asm volatile("" ::: "memory");
         if (*in_ptr == 0) {
+            // Architecturally taken, but predictor should guess not-taken
             continue;
-        }
-        gate_delay();
-        for (int i = 0; i < n_out; i++) {
-            void *out_ptr = (iter < GATE_TRAINING_ITERS) ? train_out_ptr(i) : outs[i];
-            maccess(out_ptr);
+        } else {
+            gate_delay();
+            for (int i = 0; i < n_out; i++) {
+                void *out_ptr = (iter < GATE_TRAINING_ITERS) ? train_out_ptr(i) : outs[i];
+                maccess(out_ptr);
+            }   
         }
     }
 }
 
 __attribute__((noinline))
 void NAND_M(void **outs, int n_out, void *in1, void *in2) {
-    g_train_in1[0] = 1;
-    g_train_in2[0] = 1;
+    g_train_in1[0] = 0;
+    g_train_in2[0] = 0;
 
     for (int iter = 0; iter < GATE_TRAINING_ITERS + 1; iter++) {
         volatile uint8_t *p1 =
@@ -55,20 +57,22 @@ void NAND_M(void **outs, int n_out, void *in1, void *in2) {
 
         asm volatile("" ::: "memory");
         if (((uint8_t)(*p1 + *p2)) == 0) {
+            // Architecturally taken, but predictor should guess not-taken
             continue;
-        }
-        gate_delay();
-        for (int i = 0; i < n_out; i++) {
-            void *out_ptr = (iter < GATE_TRAINING_ITERS) ? train_out_ptr(i) : outs[i];
-            maccess(out_ptr);
+        } else {
+            gate_delay();
+            for (int i = 0; i < n_out; i++) {
+                void *out_ptr = (iter < GATE_TRAINING_ITERS) ? train_out_ptr(i) : outs[i];
+                maccess(out_ptr);
+            }
         }
     }
 }
 
 __attribute__((noinline))
 void NOR_M(void **outs, int n_out, void *in1, void *in2) {
-    g_train_in1[0] = 1;
-    g_train_in2[0] = 1;
+    g_train_in1[0] = 0;
+    g_train_in2[0] = 0;
 
     for (int iter = 0; iter < GATE_TRAINING_ITERS + 1; iter++) {
         volatile uint8_t *p1 =
@@ -77,16 +81,14 @@ void NOR_M(void **outs, int n_out, void *in1, void *in2) {
             (iter < GATE_TRAINING_ITERS) ? g_train_in2 : (volatile uint8_t *)in2;
 
         asm volatile("" ::: "memory");
-        if (*p1 == 0) {
+        if (*p1 == 0 || *p2 == 0) {
+            // Architecturally taken, but predictor should guess not-taken
             continue;
-        }
-        if (*p2 == 0) {
-            continue;
-        }
-        gate_delay();
-        for (int i = 0; i < n_out; i++) {
-            void *out_ptr = (iter < GATE_TRAINING_ITERS) ? train_out_ptr(i) : outs[i];
-            maccess(out_ptr);
+        } else {
+            for (int i = 0; i < n_out; i++) {
+                void *out_ptr = (iter < GATE_TRAINING_ITERS) ? train_out_ptr(i) : outs[i];
+                maccess(out_ptr);
+            }
         }
     }
 }

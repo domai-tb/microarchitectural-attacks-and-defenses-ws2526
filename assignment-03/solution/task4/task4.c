@@ -11,16 +11,16 @@ static uint8_t g_train_out[PAGE_SIZE] __attribute__((aligned(PAGE_SIZE)));
 static inline void window_delay(void) {
     uint64_t x = 1;
     for (int i = 0; i < GATE_WINDOW_DELAY_ITERS; i++) {
-        x = x * 33 + 17;
+        x = x * 33 + 17;  // Just some operation that depends on x
     }
     asm volatile("" : "+r"(x) : : "memory");
 }
 
 __attribute__((noinline))
 void AND(void *out, void *in1, void *in2) {
-    g_window_train[0] = 1;
-    g_train_in1[0] = 1;
-    g_train_in2[0] = 1;
+    g_window_train[0] = 0;
+    g_train_in1[0] = 0;
+    g_train_in2[0] = 0;
 
     clflush_line(g_window);
 
@@ -36,24 +36,25 @@ void AND(void *out, void *in1, void *in2) {
 
         asm volatile("" ::: "memory");
         if (*win == 0) {
+            // Architecturally taken, but predictor should guess not-taken
             continue;
+        } else {
+            window_delay();
+
+            uint8_t v1 = *p1;
+            uint8_t v2 = *p2;
+            uint8_t mask = (uint8_t)(v1 & v2);
+            volatile uint8_t *out_dep = out_ptr + (mask & 1);
+            maccess((void *)out_dep);
         }
-
-        window_delay();
-
-        uint8_t v1 = *p1;
-        uint8_t v2 = *p2;
-        uint8_t mask = (uint8_t)(v1 & v2);
-        volatile uint8_t *out_dep = out_ptr + (mask & 1);
-        maccess((void *)out_dep);
     }
 }
 
 __attribute__((noinline))
 void OR(void *out, void *in1, void *in2) {
-    g_window_train[0] = 1;
-    g_train_in1[0] = 1;
-    g_train_in2[0] = 1;
+    g_window_train[0] = 0;
+    g_train_in1[0] = 0;
+    g_train_in2[0] = 0;
 
     clflush_line(g_window);
 
@@ -69,17 +70,18 @@ void OR(void *out, void *in1, void *in2) {
 
         asm volatile("" ::: "memory");
         if (*win == 0) {
+            // Architecturally taken, but predictor should guess not-taken
             continue;
+        } else {
+            window_delay();
+
+            uint8_t v1 = *p1;
+            volatile uint8_t *out1 = out_ptr + (v1 & 1);
+            maccess((void *)out1);
+
+            uint8_t v2 = *p2;
+            volatile uint8_t *out2 = out_ptr + (v2 & 1);
+            maccess((void *)out2);
         }
-
-        window_delay();
-
-        uint8_t v1 = *p1;
-        volatile uint8_t *out1 = out_ptr + (v1 & 1);
-        maccess((void *)out1);
-
-        uint8_t v2 = *p2;
-        volatile uint8_t *out2 = out_ptr + (v2 & 1);
-        maccess((void *)out2);
     }
 }
